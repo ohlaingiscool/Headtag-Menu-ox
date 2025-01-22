@@ -1,4 +1,4 @@
-# HeadTags System-ox
+# HeadTags System | By JoeV2, updated by djbenny and made fully ox_lib
 A FiveM resource that adds customizable head tags above players with role-based permissions.
 
 Original support discord and more [Discord](https://discord.gg/TZFPF2n5Ys)
