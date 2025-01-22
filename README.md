@@ -2,6 +2,7 @@
 A FiveM resource that adds customizable head tags above players with role-based permissions.
 
 Original support discord and more [Discord](https://discord.gg/TZFPF2n5Ys)
+
 Full ox_lib version discord: [Discord](https://discord.gg/sY4GQdYMXe)
 
 ## Features
