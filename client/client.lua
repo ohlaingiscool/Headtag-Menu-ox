@@ -145,18 +145,12 @@ Citizen.CreateThread(function()
     end
 end)
 
-local mainMenu = RageUI.CreateMenu("Headtag Menu", "~b~Headtag Menu | By JoeV2", 1400, 100, nil, nil, 255, 255, 255, 255)
-mainMenu:SetTotalItemsPerPage(8)
-
-
-mainMenu.Closed = function()
-    isMenuOpen = false
-end
+local isMenuOpen = false
 
 RegisterCommand('headtags', function()
     if isMenuOpen then
         isMenuOpen = false
-        RageUI.CloseAll()
+        lib.hideContext()
     else
         OpenHeadtagMenu()
     end
@@ -164,82 +158,71 @@ end, false)
 
 function OpenHeadtagMenu()
     if isMenuOpen then return end
-
     isMenuOpen = true
-    searchQuery = ""
-    RageUI.Visible(mainMenu, true)
     local headtags = lib.callback.await('jd-headtags:return-tags')
+    local searchQuery = ""
 
-    Citizen.CreateThread(function()
-        while isMenuOpen do
-            Wait(1)
-            RageUI.IsVisible(mainMenu, function()
-                RageUI.Button("Toggle Headtag", "Toggle headtag", { RightLabel = "→→→" }, true, {
-                    onSelected = function()
-                        TriggerServerEvent('jd-headtags:server:toggleTag')
-                    end
-                }, nil)
+    local options = {
+        {
+            title = "Toggle Headtag",
+            description = "Toggle your personal headtag",
+            event = 'jd-headtags:server:toggleTag'
+        },
+        {
+            title = "Toggle All Headtags",
+            description = "Toggle all headtags on/off",
+            event = 'jd-headtags:server:toggleAllTags'
+        }
+    }
 
-                RageUI.Button("Toggle All Headtags", "Toggle all headtags", { RightLabel = "→→→" }, true, {
-                    onSelected = function()
-                        TriggerServerEvent('jd-headtags:server:toggleAllTags')
-                    end
-                }, nil)
-
-                if Config.EnableSearch then
-                    RageUI.Button("Search Tags", searchQuery == "" and "Click to search tags" or "Current search: " .. searchQuery, { RightLabel = "→→→" }, true, {
-                        onSelected = function()
-                            local input = lib.inputDialog('Headtag Search', {
-                                { type = 'input', label = 'Search Query', description = 'Enter text to filter tags' }
-                            })
-                            if input then
-                                searchQuery = input[1]:lower()
-                            end
-                        end
-                    }, nil)
+    if Config.EnableSearch then
+        table.insert(options, {
+            title = "Search Tags",
+            description = "Search for specific headtags",
+            onSelect = function()
+                local input = lib.inputDialog('Headtag Search', {
+                    { type = 'input', label = 'Search Query', description = 'Enter text to filter tags' }
+                })
+                if input and input[1] then
+                    searchQuery = input[1]:lower()
+                    OpenHeadtagMenuWithSearch(headtags, searchQuery)
                 end
-
-                RageUI.Separator("")
-
-
-                local foundMatch = false
-                for i = 1, #headtags do
-                    local tag = headtags[i]
-                    if not Config.EnableSearch or searchQuery == "" or string.find(string.lower(tag), searchQuery) then
-                        foundMatch = true
-                        RageUI.Button('~y~[' .. i .. ']~s~ ' .. tag, "Select headtag " .. tag, { --[[ RightLabel = "→→→" ]]}, true, {
-                            onSelected = function()
-                                TriggerServerEvent('jd-headtags:server:setTag', i)
-                            end
-                        }, nil)
-                    end
-                end
-
-                if Config.EnableSearch and not foundMatch and searchQuery ~= "" then
-                    lib.notify({
-                        title = 'Headtag Search',
-                        description = 'No headtags found matching: ' .. searchQuery,
-                        type = 'error',
-                        position = 'center-right',
-                        duration = 5000
-                    })
-                    searchQuery = ""
-                end
-
-                if Config.EnableSearch and searchQuery ~= "" then
-                    RageUI.Button("Clear Search", "Clear current search filter", { RightLabel = "→→→" }, true, {
-                        onSelected = function()
-                            searchQuery = ""
-                        end
-                    }, nil)
-                end
-            end)
-
-            if not RageUI.Visible(mainMenu) then
-                isMenuOpen = false
-                break
             end
+        })
+    end
+
+    for i, tag in ipairs(headtags) do
+        if not Config.EnableSearch or searchQuery == "" or string.find(string.lower(tag), searchQuery) then
+            table.insert(options, {
+                title = '~y~[' .. i .. ']~s~ ' .. tag,
+                description = 'Select headtag: ' .. tag,
+                event = 'jd-headtags:server:setTag',
+                args = i
+            })
         end
-    end)
+    end
+
+    if Config.EnableSearch and searchQuery ~= "" then
+        table.insert(options, {
+            title = "Clear Search",
+            description = "Clear the current search filter",
+            onSelect = function()
+                searchQuery = ""
+                OpenHeadtagMenu()
+            end
+        })
+    end
+
+    lib.registerContext({
+        id = 'headtag_menu',
+        title = 'Headtag Menu',
+        options = options
+    })
+
+    lib.showContext('headtag_menu')
 end
 
+function OpenHeadtagMenuWithSearch(headtags, searchQuery)
+    isMenuOpen = false
+    OpenHeadtagMenu() -- Reopen menu with filtered options
+end
