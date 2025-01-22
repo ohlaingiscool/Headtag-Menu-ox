@@ -1,7 +1,8 @@
-# HeadTags System
+# HeadTags System-ox
 A FiveM resource that adds customizable head tags above players with role-based permissions.
 
-support discord and more [Discord](https://discord.gg/TZFPF2n5Ys)
+Original support discord and more [Discord](https://discord.gg/TZFPF2n5Ys)
+Full ox_lib version discord: [Discord](https://discord.gg/sY4GQdYMXe)
 
 ## Features
 - Ace-based headtags using ACE permissions
@@ -13,7 +14,6 @@ support discord and more [Discord](https://discord.gg/TZFPF2n5Ys)
 
 ## Dependencies
 - [ox_lib](https://github.com/overextended/ox_lib)
-- [RageUI](https://github.com/Joe-Development/Headtag-Menu/releases/download/release/RageUI.zip)
 
 ## Installation
 1. Download the latest release
